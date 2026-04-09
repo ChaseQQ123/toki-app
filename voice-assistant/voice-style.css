@@ -338,6 +338,100 @@ body {
     }
 }
 
+/* 视频通话按钮 */
+.video-call-btn {
+    position: absolute;
+    right: 60px;
+    top: 20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.video-call-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* 视频容器 */
+.video-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 2000;
+}
+
+.video-container.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.video-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+.video-wrapper video {
+    max-width: 45%;
+    max-height: 80%;
+    border-radius: 10px;
+    background: #000;
+}
+
+#localVideo {
+    transform: scaleX(-1); /* 镜像显示 */
+}
+
+.video-controls {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.end-call-btn,
+.mute-video-btn,
+.mute-audio-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.end-call-btn {
+    background: #ff4444;
+    color: white;
+}
+
+.end-call-btn:hover {
+    background: #cc0000;
+}
+
+.mute-video-btn,
+.mute-audio-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.mute-video-btn:hover,
+.mute-audio-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
 /* 响应式 */
 @media (max-width: 600px) {
     body {
