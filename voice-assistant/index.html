@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI - 语音助手</title>
+    <link rel="stylesheet" href="voice-style.css">
+</head>
+<body>
+    <div class="voice-container">
+        <!-- 头部 -->
+        <header class="voice-header">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <span class="logo-text">TOKI</span>
+            </div>
+            <div class="status" id="status">
+                <span class="status-dot"></span>
+                <span class="status-text">准备就绪</span>
+            </div>
+        </header>
+
+        <!-- 对话区域 -->
+        <main class="conversation" id="conversation">
+            <div class="welcome">
+                <div class="bot-avatar">🤖</div>
+                <div class="message bot">
+                    你好！我是TOKI，你的语音助手。
+                    <br><br>
+                    点击下方麦克风按钮，或说"嘿TOKI"开始对话。
+                </div>
+            </div>
+        </main>
+
+        <!-- 语音控制区 -->
+        <footer class="voice-controls">
+            <div class="voice-button-wrapper">
+                <button class="voice-button" id="voiceButton">
+                    <div class="mic-icon">🎤</div>
+                    <div class="pulse-ring"></div>
+                </button>
+                <div class="hint" id="hint">按住说话</div>
+            </div>
+            
+            <div class="transcript" id="transcript">
+                <div class="transcript-text">点击麦克风开始对话...</div>
+            </div>
+        </footer>
+
+        <!-- 设置面板 -->
+        <div class="settings-panel" id="settingsPanel">
+            <div class="settings-header">
+                <h3>设置</h3>
+                <button class="close-btn" id="closeSettings">×</button>
+            </div>
+            <div class="settings-content">
+                <div class="setting-item">
+                    <label>语音唤醒</label>
+                    <input type="checkbox" id="wakeWordEnabled" checked>
+                </div>
+                <div class="setting-item">
+                    <label>语音速度</label>
+                    <input type="range" id="speechRate" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                <div class="setting-item">
+                    <label>离线模式</label>
+                    <input type="checkbox" id="offlineMode">
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置按钮 -->
+        <button class="settings-btn" id="settingsBtn">⚙️</button>
+    </div>
+
+    <script src="voice-app.js"></script>
+</body>
+</html>
