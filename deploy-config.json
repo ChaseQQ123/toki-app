@@ -1,0 +1,9 @@
+{
+  "server": "8.217.119.125",
+  "path": "/var/www/toknm.hk/toki",
+  "files": [
+    "web-demo/index.html",
+    "web-demo/style.css",
+    "web-demo/app.js"
+  ]
+}
