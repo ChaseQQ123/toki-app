@@ -397,18 +397,43 @@
             showTypingIndicator();
             
             try {
-                // 使用智能路由器
-                const response = await router.chat([{role: 'user', content: message}]);
+                // 🔍 判断请求类型
+                const requestType = router.classifyRequest(message);
+                console.log('🔍 请求类型:', requestType);
                 
-                // 提取回复
-                const text = response.choices[0].message.content;
-                const routing = response.routing;
+                let response;
+                let routing;
                 
-                // 移除思考动画
-                hideTypingIndicator();
-                
-                // 添加AI回复（带路由信息）
-                addMessage(text, 'bot', routing);
+                // 🎨 如果是图像生成，调用专门的API
+                if (requestType === 'image_gen') {
+                    console.log('🎨 调用图像生成API...');
+                    response = await router.generateImage(message);
+                    routing = response.routing;
+                    
+                    // 提取图片URL
+                    const imageUrl = response.data[0].url;
+                    console.log('📸 图片URL:', imageUrl);
+                    
+                    // 移除思考动画
+                    hideTypingIndicator();
+                    
+                    // 显示图片
+                    addMessage(`<img src="${imageUrl}" style="max-width:100%;border-radius:8px;">`, 'bot', routing);
+                    addMessage('🎨 图片已生成！', 'bot', routing);
+                } else {
+                    // 💬 文本对话
+                    response = await router.chat([{role: 'user', content: message}]);
+                    
+                    // 提取回复
+                    const text = response.choices[0].message.content;
+                    routing = response.routing;
+                    
+                    // 移除思考动画
+                    hideTypingIndicator();
+                    
+                    // 添加AI回复（带路由信息）
+                    addMessage(text, 'bot', routing);
+                }
                 
                 // 扣除Token
                 if (response.usage) {
@@ -417,6 +442,7 @@
                 }
                 
             } catch (error) {
+                console.error('❌ 错误:', error);
                 hideTypingIndicator();
                 addMessage('网络连接失败，请重试', 'bot');
             }
