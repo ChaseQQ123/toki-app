@@ -41,6 +41,54 @@ class TOKIVoiceAssistant {
         this.loadConversationHistory();
         
         console.log('✅ TOKI语音助手已启动');
+        console.log('🔊 语音合成状态:', this.synthesis ? '可用' : '不可用');
+        
+        // 启动后立即测试语音
+        setTimeout(() => {
+            this.testSpeechSynthesis();
+        }, 1500);
+    }
+    
+    // 测试语音合成
+    testSpeechSynthesis() {
+        console.log('🧪 测试语音合成...');
+        
+        if (!this.synthesis) {
+            console.error('❌ 语音合成不可用');
+            this.addMessage('⚠️ 浏览器不支持语音合成', 'bot');
+            return;
+        }
+        
+        // 显示可用语音
+        const voices = this.synthesis.getVoices();
+        console.log('🗣️ 可用语音数量:', voices.length);
+        
+        if (voices.length === 0) {
+            console.warn('⚠️ 没有可用语音，等待加载...');
+            this.synthesis.onvoiceschanged = () => {
+                const v = this.synthesis.getVoices();
+                console.log('📢 语音已加载:', v.length);
+                this.playTestVoice();
+            };
+        } else {
+            this.playTestVoice();
+        }
+    }
+    
+    // 播放测试语音
+    playTestVoice() {
+        const testText = '语音功能已就绪';
+        console.log('🔊 播放测试语音:', testText);
+        
+        const utterance = new SpeechSynthesisUtterance(testText);
+        utterance.lang = 'zh-CN';
+        utterance.rate = 1.0;
+        
+        utterance.onstart = () => console.log('✅ 测试语音开始');
+        utterance.onend = () => console.log('✅ 测试语音结束');
+        utterance.onerror = (e) => console.error('❌ 测试语音失败:', e);
+        
+        this.synthesis.speak(utterance);
     }
     
     // 加载中文语音（修复版）
@@ -365,7 +413,7 @@ class TOKIVoiceAssistant {
         this.updateUI('idle');
     }
     
-    // 处理用户输入
+    // 处理用户输入（确保语音回复）
     async processUserInput(text) {
         console.log('💬 用户输入:', text);
         
@@ -381,16 +429,37 @@ class TOKIVoiceAssistant {
         try {
             // 获取AI回复
             const response = await this.getAIResponse(text);
+            console.log('🤖 AI回复:', response);
             
             // 添加AI消息
             this.addMessage(response, 'bot');
             
-            // 语音合成回答
+            // 🔊 强制语音合成回复
+            console.log('🗣️ 准备语音合成...');
+            
+            // 检查语音合成是否可用
+            if (!this.synthesis) {
+                console.error('❌ 语音合成不可用');
+                this.addMessage('⚠️ 浏览器不支持语音合成', 'bot');
+                return;
+            }
+            
+            // 等待语音播放完成
             await this.speak(response);
+            console.log('✅ 语音合成完成');
             
         } catch (error) {
             console.error('❌ 获取回复失败:', error);
-            this.showError('抱歉，我遇到了问题，请重试');
+            
+            const errorMsg = '抱歉，我遇到了问题，请重试';
+            this.addMessage(errorMsg, 'bot');
+            
+            // 即使出错也尝试语音回复
+            try {
+                await this.speak(errorMsg);
+            } catch (e) {
+                console.error('❌ 语音合成失败:', e);
+            }
         }
         
         // 恢复状态
