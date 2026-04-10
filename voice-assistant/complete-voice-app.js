@@ -43,29 +43,36 @@ class TOKIVoiceAssistant {
         console.log('✅ TOKI语音助手已启动');
     }
     
-    // 加载中文语音
+    // 加载中文语音（修复版）
     loadChineseVoice() {
         if (!this.synthesis) {
-            console.error('浏览器不支持语音合成');
+            console.error('❌ 浏览器不支持语音合成');
+            this.showError('浏览器不支持语音合成');
             return;
         }
         
         const loadVoices = () => {
             const voices = this.synthesis.getVoices();
-            console.log('可用语音:', voices.map(v => `${v.name} (${v.lang})`));
+            console.log('🗣️ 可用语音数量:', voices.length);
+            console.log('🗣️ 可用语音:', voices.map(v => `${v.name} (${v.lang})`));
             
             // 优先选择中文语音
             this.chineseVoice = voices.find(voice => 
                 voice.lang === 'zh-CN' || 
                 voice.lang.includes('zh') ||
                 voice.name.includes('Chinese') ||
-                voice.name.includes('中文')
+                voice.name.includes('中文') ||
+                voice.name.includes('Google')
             );
             
             if (this.chineseVoice) {
-                console.log('✅ 已选择中文语音:', this.chineseVoice.name);
+                console.log('✅ 已选择中文语音:', this.chineseVoice.name, this.chineseVoice.lang);
             } else {
-                console.warn('未找到中文语音，将使用默认语音');
+                console.warn('⚠️ 未找到中文语音，将使用默认语音');
+                if (voices.length > 0) {
+                    this.chineseVoice = voices[0];
+                    console.log('✅ 使用默认语音:', this.chineseVoice.name);
+                }
             }
         };
         
@@ -73,7 +80,15 @@ class TOKIVoiceAssistant {
         loadVoices();
         
         // Chrome需要等待voiceschanged事件
-        this.synthesis.onvoiceschanged = loadVoices;
+        this.synthesis.onvoiceschanged = () => {
+            console.log('📢 语音列表已更新');
+            loadVoices();
+        };
+        
+        // 延迟再次加载（某些设备需要）
+        setTimeout(loadVoices, 100);
+        setTimeout(loadVoices, 500);
+        setTimeout(loadVoices, 1000);
     }
     
     // 初始化语音识别
@@ -425,36 +440,44 @@ class TOKIVoiceAssistant {
         }
     }
     
-    // 语音合成（带中文语音）
+    // 语音合成（修复版）
     async speak(text) {
+        console.log('🗣️ 开始语音合成, 文本长度:', text.length);
+        
         return new Promise((resolve, reject) => {
             if (!this.synthesis) {
-                console.error('浏览器不支持语音合成');
+                console.error('❌ 浏览器不支持语音合成');
                 this.addMessage('⚠️ 浏览器不支持语音合成', 'bot');
                 resolve();
                 return;
             }
             
             // 停止当前播放
-            this.synthesis.cancel();
+            if (this.synthesis.speaking) {
+                console.log('⏹️ 停止当前播放');
+                this.synthesis.cancel();
+            }
             
             // 创建话语
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'zh-CN';
-            utterance.rate = this.config.speechRate;
-            utterance.pitch = 1;
-            utterance.volume = 1;
+            utterance.rate = this.config.speechRate || 1.0;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
             
             // 使用中文语音
             if (this.chineseVoice) {
                 utterance.voice = this.chineseVoice;
+                console.log('✅ 使用语音:', this.chineseVoice.name);
+            } else {
+                console.warn('⚠️ 未找到中文语音，使用默认');
             }
             
             // 事件监听
             utterance.onstart = () => {
                 this.isSpeaking = true;
                 this.updateStatus('🔊 正在说话...');
-                console.log('🔊 开始语音播放');
+                console.log('🔊 语音播放开始');
             };
             
             utterance.onend = () => {
@@ -466,13 +489,31 @@ class TOKIVoiceAssistant {
             
             utterance.onerror = (event) => {
                 this.isSpeaking = false;
-                console.error('❌ 语音播放失败:', event);
-                this.addMessage('💡 语音播放失败', 'bot');
-                resolve(); // 继续执行
+                console.error('❌ 语音播放失败:', event.error);
+                
+                if (event.error !== 'interrupted') {
+                    this.addMessage('💡 语音播放失败，请检查浏览器设置', 'bot');
+                }
+                
+                resolve();
             };
             
             // 开始播放
-            this.synthesis.speak(utterance);
+            try {
+                this.synthesis.speak(utterance);
+                console.log('✅ 语音已添加到播放队列');
+                
+                // 某些浏览器需要触发
+                setTimeout(() => {
+                    if (!this.synthesis.speaking) {
+                        console.log('⚠️ 语音未开始，重新触发');
+                        this.synthesis.speak(utterance);
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('❌ 语音合成异常:', error);
+                resolve();
+            }
         });
     }
     
@@ -740,6 +781,16 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('✅ 语音识别已启用');
     console.log('✅ 语音合成已启用');
     console.log('✅ 视频通话已启用');
+    
+    // 添加测试按钮（调试用）
+    setTimeout(() => {
+        console.log('🧪 语音合成测试...');
+        if (window.toki.synthesis) {
+            const test = new SpeechSynthesisUtterance('语音功能已就绪');
+            test.lang = 'zh-CN';
+            window.toki.synthesis.speak(test);
+        }
+    }, 2000);
 });
 
 // 测试命令
