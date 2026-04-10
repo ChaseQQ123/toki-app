@@ -358,48 +358,47 @@ class TOKIVoiceAssistant {
         this.updateStatus('准备就绪');
     }
     
-    // 获取AI回复
+    // 获取AI回复（智谱AI）
     async getAIResponse(text) {
-        // TODO: 连接Gemma 4 API
-        // 目前使用本地模拟回复
+        // 智谱AI配置
+        const ZHIPU_API_KEY = 'c4911cf15f844167bd26301e25622cf1.n1BU10ytXbnQ6N5d';
+        const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
         
-        const lowerText = text.toLowerCase().trim();
-        
-        // 精确匹配
-        const exactResponses = {
-            '你好': '你好！我是TOKI，很高兴为你服务！',
-            '早上好': '早上好！今天天气真不错，祝你愉快！',
-            '晚上好': '晚上好！今天过得怎么样？',
-            '你是谁': '我是TOKI，你的AI语音助手。我可以帮你处理各种任务。',
-            '介绍一下自己': '我是TOKI，你的AI语音助手。我可以帮你设置提醒、查询信息、安排日程等。',
-            '现在几点': `现在是${new Date().toLocaleTimeString('zh-CN')}`,
-            '今天星期几': `今天是${['日', '一', '二', '三', '四', '五', '六'][new Date().getDay()]}星期`,
-            '今天天气': '今天天气晴朗，温度适宜，非常适合外出活动。',
-            '谢谢': '不客气！这是我应该做的。',
-            '再见': '再见！有需要随时找我。'
-        };
-        
-        // 检查精确匹配
-        if (exactResponses[lowerText]) {
-            return exactResponses[lowerText];
-        }
-        
-        // 模糊匹配
-        for (const [key, value] of Object.entries(exactResponses)) {
-            if (lowerText.includes(key)) {
-                return value;
+        try {
+            const response = await fetch(ZHIPU_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${ZHIPU_API_KEY}`
+                },
+                body: JSON.stringify({
+                    model: 'glm-4-flash',
+                    messages: [{ role: 'user', content: text }],
+                    temperature: 0.7,
+                    max_tokens: 500
+                })
+            });
+            
+            if (!response.ok) {
+                throw new Error(`API错误: ${response.status}`);
             }
+            
+            const data = await response.json();
+            return data.choices[0].message.content;
+            
+        } catch (error) {
+            console.error('获取AI回复失败:', error);
+            
+            // 降级到本地回复
+            const responses = {
+                '你好': '你好！我是TOKI，很高兴为你服务！',
+                '早上好': '早上好！今天天气真不错，祝你愉快！',
+                '你是谁': '我是TOKI，你的AI语音助手。',
+            };
+            
+            return responses[text.toLowerCase()] || 
+                `网络连接失败，请检查网络后重试。`;
         }
-        
-        // 默认回复
-        const defaultResponses = [
-            `我听到你说："${text}"。这是一个很好的问题！`,
-            `关于"${text}"，我需要更多信息才能回答。`,
-            `好的，我明白了。你说的是"${text}"对吗？`,
-            `收到！我正在处理你的请求。`
-        ];
-        
-        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
     }
     
     // 语音合成（带中文语音）

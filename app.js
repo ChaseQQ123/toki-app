@@ -141,50 +141,54 @@ function hideTypingIndicator() {
     if (indicator) indicator.remove();
 }
 
-// 调用AI API (模拟)
+// 调用智谱AI API (真实)
 async function callAI(message) {
-    // TODO: 替换为真实的TOKNM API
-    // const response = await fetch('https://api.toknm.hk/v1/chat', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer YOUR_API_KEY'
-    //     },
-    //     body: JSON.stringify({
-    //         model: 'deepseek-chat',
-    //         messages: [{ role: 'user', content: message }]
-    //     })
-    // });
+    // 智谱AI配置
+    const ZHIPU_API_KEY = 'c4911cf15f844167bd26301e25622cf1.n1BU10ytXbnQ6N5d';
+    const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
     
-    // 模拟响应（用于demo）
-    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
-    
-    // 模拟智能回复
-    const responses = {
-        '你好': '你好！我是TOKI，很高兴为你服务！有什么我可以帮助你的吗？',
-        '介绍': '我是TOKI，你的AI助手。我可以帮你回答问题、提供建议、处理日常事务。我背后连接了多个先进的大语言模型，为你提供最优质的服务。',
-        '价格': '我们的套餐非常实惠：\n• 体验版：免费，10,000 tokens/月\n• 标准版：¥49.9/月，500,000 tokens\n• 尊享版：¥99.9/月，无限tokens\n点击"升级套餐"查看详情！',
-        'token': `你目前还有 ${state.tokens.toLocaleString()} tokens。Tokens是你使用AI的额度，每次对话会消耗相应数量的tokens。当额度不足时，可以购买套餐继续使用。`,
-        '功能': '我可以帮你：\n✨ 回答各种问题\n📝 协助写作和编辑\n💡 提供建议和创意\n📊 数据分析和解释\n🌐 翻译和多语言支持\n还有更多功能等你探索！'
-    };
-    
-    // 智能匹配
-    const lowerMsg = message.toLowerCase();
-    for (const [key, value] of Object.entries(responses)) {
-        if (lowerMsg.includes(key)) {
-            return { text: value, tokens: Math.ceil(message.length * 0.5) };
+    try {
+        const response = await fetch(ZHIPU_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ZHIPU_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'glm-4-flash', // 免费模型
+                messages: [{ role: 'user', content: message }],
+                temperature: 0.7,
+                max_tokens: 1000
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API错误: ${response.status}`);
         }
+        
+        const data = await response.json();
+        
+        // 提取回复
+        const text = data.choices[0].message.content;
+        const tokens = data.usage?.total_tokens || Math.ceil(message.length * 0.5);
+        
+        return { text, tokens };
+        
+    } catch (error) {
+        console.error('API调用失败:', error);
+        
+        // 降级到本地回复
+        const fallbackResponses = {
+            '你好': '你好！我是TOKI，很高兴为你服务！',
+            '你是谁': '我是TOKI，你的AI助手。',
+            '功能': '我可以帮你回答问题、提供建议、协助写作等。',
+        };
+        
+        const fallback = fallbackResponses[message.toLowerCase()] || 
+            `网络连接失败，请检查网络后重试。`;
+        
+        return { text: fallback, tokens: 10 };
     }
-    
-    // 默认回复
-    const defaultResponses = [
-        `这是一个很好的问题！让我想想...\n\n关于"${message}"，我需要了解更多背景信息才能给出更准确的回答。你能提供更多细节吗？`,
-        `我理解你的问题。${message}是一个值得深入探讨的话题。\n\n根据我的分析，这个问题涉及多个方面。如果你想要更具体的建议，可以告诉我更多相关信息。`,
-        `感谢你的提问！关于${message}，我可以从几个角度来分析：\n\n1. 首先，我们需要明确核心问题\n2. 其次，考虑相关因素\n3. 最后，制定可行的方案\n\n你觉得这个思路如何？需要我详细解释某一点吗？`
-    ];
-    
-    const randomResponse = defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-    return { text: randomResponse, tokens: Math.ceil((message.length + randomResponse.length) * 0.3) };
 }
 
 // 更新Token显示
