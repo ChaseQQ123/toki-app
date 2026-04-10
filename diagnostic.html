@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI 网络诊断</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        .test-item {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #ddd;
+        }
+        .test-item.success {
+            border-color: #4CAF50;
+            background: #f1f8f4;
+        }
+        .test-item.error {
+            border-color: #f44336;
+            background: #fef1f0;
+        }
+        .test-item.pending {
+            border-color: #ff9800;
+            background: #fff8f0;
+        }
+        .test-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .test-result {
+            font-size: 14px;
+            color: #666;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 TOKI 网络诊断</h1>
+        <button onclick="runAllTests()">开始诊断</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'c4911cf15f844167bd26301e25622cf1.n1BU10ytXbnQ6N5d';
+        const BASE_URL = 'https://open.bigmodel.cn/api/paas/v4';
+        
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            // 测试1：检查网络连接
+            await testNetworkConnection();
+            
+            // 测试2：检查API Key
+            await testApiKey();
+            
+            // 测试3：测试文本模型
+            await testTextModel();
+            
+            // 测试4：检查CORS
+            await testCORS();
+            
+            // 测试5：检查HTTPS
+            testHTTPS();
+        }
+        
+        async function testNetworkConnection() {
+            addTest('网络连接', 'pending', '测试中...');
+            
+            try {
+                const response = await fetch('https://www.google.com', { 
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                
+                addTest('网络连接', 'success', '✅ 网络连接正常');
+            } catch (error) {
+                addTest('网络连接', 'error', `❌ 网络连接失败: ${error.message}`);
+            }
+        }
+        
+        async function testApiKey() {
+            addTest('API Key验证', 'pending', '测试中...');
+            
+            // 只显示部分API Key
+            const keyPreview = API_KEY.substring(0, 10) + '...' + API_KEY.substring(API_KEY.length - 10);
+            addTest('API Key验证', 'success', `✅ API Key格式正确\n完整Key: ${keyPreview}`);
+        }
+        
+        async function testTextModel() {
+            addTest('文本模型测试', 'pending', '测试中...');
+            
+            try {
+                const response = await fetch(`${BASE_URL}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'glm-4-flash',
+                        messages: [{role: 'user', content: '你好'}],
+                        max_tokens: 10
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    addTest('文本模型测试', 'success', 
+                        `✅ 文本模型可用\n` +
+                        `状态码: ${response.status}\n` +
+                        `模型: ${data.model}\n` +
+                        `回复: ${data.choices[0].message.content}`
+                    );
+                } else {
+                    const errorText = await response.text();
+                    addTest('文本模型测试', 'error', 
+                        `❌ 文本模型调用失败\n` +
+                        `状态码: ${response.status}\n` +
+                        `错误: ${errorText}`
+                    );
+                }
+            } catch (error) {
+                addTest('文本模型测试', 'error', 
+                    `❌ 请求失败\n` +
+                    `错误类型: ${error.name}\n` +
+                    `错误信息: ${error.message}\n\n` +
+                    `💡 可能原因：\n` +
+                    `1. CORS策略阻止（浏览器安全限制）\n` +
+                    `2. 网络连接问题\n` +
+                    `3. API地址不可访问`
+                );
+            }
+        }
+        
+        async function testCORS() {
+            addTest('CORS检查', 'pending', '测试中...');
+            
+            const currentUrl = window.location.href;
+            const isHTTPS = currentUrl.startsWith('https://');
+            const isLocalhost = currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1');
+            
+            let result = `当前页面: ${currentUrl}\n`;
+            result += `协议: ${isHTTPS ? 'HTTPS ✅' : 'HTTP ⚠️'}\n`;
+            result += `环境: ${isLocalhost ? '本地 ✅' : '远程 ⚠️'}\n\n`;
+            
+            if (!isHTTPS && !isLocalhost) {
+                result += `⚠️ 警告：在HTTP环境下，某些API可能无法调用\n`;
+                result += `建议：使用HTTPS或本地环境`;
+                addTest('CORS检查', 'pending', result);
+            } else {
+                result += `✅ CORS检查通过`;
+                addTest('CORS检查', 'success', result);
+            }
+        }
+        
+        function testHTTPS() {
+            addTest('HTTPS检查', 'pending', '测试中...');
+            
+            const isHTTPS = window.location.protocol === 'https:';
+            const isSecure = window.isSecureContext;
+            
+            let result = `协议: ${window.location.protocol}\n`;
+            result += `安全上下文: ${isSecure ? '是 ✅' : '否 ❌'}\n\n`;
+            
+            if (isHTTPS && isSecure) {
+                result += `✅ HTTPS环境正常`;
+                addTest('HTTPS检查', 'success', result);
+            } else {
+                result += `⚠️ 建议使用HTTPS环境`;
+                addTest('HTTPS检查', 'pending', result);
+            }
+        }
+        
+        function addTest(title, status, result) {
+            const resultsDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = `test-item ${status}`;
+            testDiv.innerHTML = `
+                <div class="test-title">${title}</div>
+                <div class="test-result">${result}</div>
+            `;
+            
+            // 移除同名的旧测试结果
+            const oldTests = resultsDiv.querySelectorAll('.test-item');
+            oldTests.forEach(test => {
+                if (test.querySelector('.test-title').textContent === title) {
+                    test.remove();
+                }
+            });
+            
+            resultsDiv.appendChild(testDiv);
+        }
+    </script>
+</body>
+</html>

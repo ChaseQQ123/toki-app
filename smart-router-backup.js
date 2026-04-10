@@ -1,4 +1,4 @@
-// TOKI 智能路由器 - CORS修复版
+// TOKI 智能路由器 - 前端集成版
 
 class TOKISmartRouter {
     constructor() {
@@ -17,49 +17,6 @@ class TOKISmartRouter {
             imageGen: 'cogview-3-flash',    // 图像生成
             videoGen: 'cogvideox-flash'     // 视频生成
         };
-        
-        // 测试连接
-        this.testConnection();
-    }
-    
-    /**
-     * 测试网络连接
-     */
-    async testConnection() {
-        console.log('🧪 测试智谱AI连接...');
-        
-        try {
-            const response = await fetch(`${this.zhipuBaseUrl}/chat/completions`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${this.zhipuApiKey}`
-                },
-                body: JSON.stringify({
-                    model: 'glm-4-flash',
-                    messages: [{role: 'user', content: '测试'}],
-                    max_tokens: 5
-                })
-            });
-            
-            if (response.ok) {
-                console.log('✅ 智谱AI连接成功');
-            } else {
-                console.error('❌ 智谱AI连接失败:', response.status);
-                const error = await response.text();
-                console.error('错误详情:', error);
-            }
-        } catch (error) {
-            console.error('❌ 网络连接失败');
-            console.error('错误类型:', error.name);
-            console.error('错误信息:', error.message);
-            
-            // 详细错误提示
-            if (error.name === 'TypeError') {
-                console.error('💡 可能原因：CORS策略阻止（浏览器安全限制）');
-                console.error('💡 解决方案：需要后端代理或使用支持的API');
-            }
-        }
     }
     
     /**
@@ -162,7 +119,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: selectedModel,  // 直接使用模型名称
+                    model: selectedModel,  // 直接使用模型名称，不要转换！
                     messages: messages,
                     temperature: options.temperature || 0.7,
                     max_tokens: options.maxTokens || 2000
@@ -170,8 +127,6 @@ class TOKISmartRouter {
             });
             
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ API错误:', response.status, errorText);
                 throw new Error(`API错误: ${response.status}`);
             }
             
@@ -206,7 +161,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: this.models.imageGen,
+                    model: this.models.imageGen,  // 直接使用
                     prompt: prompt
                 })
             });
@@ -243,7 +198,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: this.models.vision,
+                    model: this.models.vision,  // 直接使用
                     messages: [{
                         role: 'user',
                         content: [
