@@ -56,21 +56,25 @@
         .logo-text {
             font-size: 20px;
             font-weight: bold;
+            letter-spacing: 2px;
         }
         
         .token-info {
             background: rgba(255, 255, 255, 0.2);
             padding: 6px 12px;
             border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
             font-size: 12px;
         }
         
         /* 功能导航 */
         .feature-nav {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            padding: 12px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 15px;
             background: #f8f9fa;
             border-bottom: 1px solid #e9ecef;
         }
@@ -79,14 +83,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
-            padding: 10px 6px;
+            gap: 5px;
+            padding: 12px 8px;
             background: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s;
-            font-size: 11px;
         }
         
         .feature-btn:hover {
@@ -100,7 +103,12 @@
         }
         
         .feature-icon {
-            font-size: 20px;
+            font-size: 24px;
+        }
+        
+        .feature-label {
+            font-size: 11px;
+            font-weight: 500;
         }
         
         /* 对话区域 */
@@ -150,27 +158,10 @@
             border-bottom-right-radius: 4px;
         }
         
-        .message img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-        
         .user-message-wrapper {
             display: flex;
             justify-content: flex-end;
             margin-bottom: 15px;
-        }
-        
-        /* 路由信息 */
-        .routing-info {
-            font-size: 10px;
-            color: #888;
-            margin-top: 4px;
-            padding: 2px 6px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            display: inline-block;
         }
         
         /* 输入区域 */
@@ -193,6 +184,7 @@
             border-radius: 24px;
             font-size: 14px;
             outline: none;
+            transition: border-color 0.3s;
         }
         
         #userInput:focus {
@@ -208,6 +200,11 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .send-btn:hover {
+            transform: scale(1.05);
         }
         
         .send-btn:disabled {
@@ -215,7 +212,6 @@
             cursor: not-allowed;
         }
         
-        /* 快捷操作 */
         .quick-actions {
             display: flex;
             gap: 8px;
@@ -231,6 +227,7 @@
             font-size: 12px;
             white-space: nowrap;
             cursor: pointer;
+            transition: all 0.3s;
         }
         
         .quick-action:hover {
@@ -239,16 +236,39 @@
             border-color: #667eea;
         }
         
-        /* 图片预览 */
-        .image-preview {
-            max-width: 200px;
-            border-radius: 8px;
-            margin: 8px 0;
+        /* 打字动画 */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
         }
         
-        /* 隐藏的文件输入 */
-        #imageInput {
-            display: none;
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
         }
         
         /* 响应式 */
@@ -274,31 +294,28 @@
             </div>
             <div class="token-info">
                 <span>💎</span>
-                <span id="tokenCount">10,000</span>
+                <span id="tokenCount">8,542</span>
+                <span>/ 10,000</span>
             </div>
         </header>
         
         <!-- 功能导航 -->
         <div class="feature-nav">
-            <button class="feature-btn active" onclick="switchMode('chat')">
+            <button class="feature-btn active" onclick="switchFeature('chat')">
                 <span class="feature-icon">💬</span>
-                <span>对话</span>
+                <span class="feature-label">对话</span>
             </button>
             <button class="feature-btn" onclick="window.location.href='voice-assistant/'">
                 <span class="feature-icon">🎤</span>
-                <span>语音</span>
+                <span class="feature-label">语音</span>
             </button>
-            <button class="feature-btn" onclick="switchMode('image_gen')">
-                <span class="feature-icon">🎨</span>
-                <span>画图</span>
-            </button>
-            <button class="feature-btn" onclick="switchMode('vision')">
+            <button class="feature-btn" onclick="alert('图像识别功能开发中')">
                 <span class="feature-icon">📸</span>
-                <span>识图</span>
+                <span class="feature-label">识图</span>
             </button>
-            <button class="feature-btn" onclick="showHelp()">
-                <span class="feature-icon">❓</span>
-                <span>帮助</span>
+            <button class="feature-btn" onclick="window.open('https://toknm.hk', '_blank')">
+                <span class="feature-icon">ℹ️</span>
+                <span class="feature-label">关于</span>
             </button>
         </div>
         
@@ -308,11 +325,11 @@
                 <div class="bot-avatar">🤖</div>
                 <div class="message bot">
                     你好！我是TOKI，你的AI智能秘书。✨<br><br>
-                    我现在支持：<br>
-                    💬 智能文本对话<br>
-                    🎨 图像生成（说"画一张..."）<br>
-                    📸 图像识别（上传图片）<br>
-                    🎤 语音对话<br><br>
+                    我可以帮你：<br>
+                    💬 智能对话问答<br>
+                    📝 文案写作助手<br>
+                    🌐 翻译多语言<br>
+                    💡 提供建议和创意<br><br>
                     有什么我可以帮你的吗？
                 </div>
             </div>
@@ -324,34 +341,27 @@
                 <input 
                     type="text" 
                     id="userInput" 
-                    placeholder="输入问题，或说'画一张...'生成图片"
+                    placeholder="输入你的问题..."
                     autocomplete="off"
                 >
                 <button id="sendBtn" class="send-btn">发送</button>
-                <input type="file" id="imageInput" accept="image/*">
             </div>
             <div class="quick-actions">
                 <button class="quick-action" onclick="quickSend('你好')">👋 打招呼</button>
-                <button class="quick-action" onclick="quickSend('画一只可爱的猫咪')">🎨 画图</button>
+                <button class="quick-action" onclick="quickSend('写一首诗')">📝 写诗</button>
                 <button class="quick-action" onclick="quickSend('讲个笑话')">😄 笑话</button>
                 <button class="quick-action" onclick="quickSend('翻译Hello')">🌐 翻译</button>
-                <button class="quick-action" onclick="uploadImage()">📸 上传图片</button>
+                <button class="quick-action" onclick="quickSend('写文案')">✍️ 文案</button>
             </div>
         </footer>
     </div>
     
-    <!-- 引入智能路由器 -->
-    <script src="smart-router.js"></script>
-    
     <script>
-        // 初始化智能路由器
-        const router = new TOKISmartRouter();
-        
         // 状态管理
         const state = {
-            tokens: 10000,
+            tokens: 8542,
+            maxTokens: 10000,
             messages: [],
-            currentMode: 'chat',
             isTyping: false
         };
         
@@ -360,13 +370,14 @@
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const tokenCount = document.getElementById('tokenCount');
-        const imageInput = document.getElementById('imageInput');
+        
+        // 智谱AI配置
+        const ZHIPU_API_KEY = 'c4911cf15f844167bd26301e25622cf1.n1BU10ytXbnQ6N5d';
+        const ZHIPU_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions';
         
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             setupEventListeners();
-            console.log('✅ TOKI 智能路由器已启用');
-            console.log('📋 可用模型:', router.getAvailableModels());
         });
         
         // 事件监听
@@ -378,43 +389,58 @@
                     sendMessage();
                 }
             });
-            
-            // 图片上传
-            imageInput.addEventListener('change', handleImageUpload);
         }
         
-        // 发送消息（智能路由）
+        // 发送消息
         async function sendMessage() {
             const message = userInput.value.trim();
             if (!message || state.isTyping) return;
             
-            // 添加用户消息
+            // 检查Token余额
+            if (state.tokens <= 0) {
+                addMessage('Token余额不足，请升级套餐', 'bot');
+                return;
+            }
+            
+            // 显示用户消息
             addMessage(message, 'user');
             userInput.value = '';
             sendBtn.disabled = true;
             
-            // 显示思考动画
+            // 显示输入动画
             showTypingIndicator();
             
             try {
-                // 使用智能路由器
-                const response = await router.chat([{role: 'user', content: message}]);
+                // 调用智谱AI
+                const response = await fetch(ZHIPU_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${ZHIPU_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'glm-4-flash',
+                        messages: [{ role: 'user', content: message }],
+                        temperature: 0.7,
+                        max_tokens: 1000
+                    })
+                });
                 
-                // 提取回复
-                const text = response.choices[0].message.content;
-                const routing = response.routing;
+                if (!response.ok) throw new Error('API错误');
                 
-                // 移除思考动画
+                const data = await response.json();
+                const text = data.choices[0].message.content;
+                const tokens = data.usage?.total_tokens || 100;
+                
+                // 移除输入动画
                 hideTypingIndicator();
                 
-                // 添加AI回复（带路由信息）
-                addMessage(text, 'bot', routing);
+                // 显示AI回复
+                addMessage(text, 'bot');
                 
                 // 扣除Token
-                if (response.usage) {
-                    state.tokens -= response.usage.total_tokens;
-                    updateTokenDisplay();
-                }
+                state.tokens -= tokens;
+                updateTokenDisplay();
                 
             } catch (error) {
                 hideTypingIndicator();
@@ -430,64 +456,18 @@
             sendMessage();
         }
         
-        // 上传图片
-        function uploadImage() {
-            imageInput.click();
-        }
-        
-        // 处理图片上传
-        async function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            // 显示图片预览
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                const imageUrl = e.target.result;
-                
-                // 添加用户消息（图片）
-                addMessage(`<img src="${imageUrl}" class="image-preview">`, 'user');
-                
-                // 显示思考动画
-                showTypingIndicator();
-                
-                try {
-                    // 调用图像理解
-                    const response = await router.analyzeImage(imageUrl, '这张图片里有什么？');
-                    
-                    const text = response.choices[0].message.content;
-                    
-                    hideTypingIndicator();
-                    addMessage(text, 'bot', response.routing);
-                    
-                } catch (error) {
-                    hideTypingIndicator();
-                    addMessage('图像识别失败，请重试', 'bot');
-                }
-            };
-            
-            reader.readAsDataURL(file);
-        }
-        
         // 添加消息
-        function addMessage(content, type, routing = null) {
+        function addMessage(text, type) {
             const div = document.createElement('div');
             
             if (type === 'user') {
                 div.className = 'user-message-wrapper';
-                div.innerHTML = `<div class="message user">${content}</div>`;
+                div.innerHTML = `<div class="message user">${escapeHtml(text)}</div>`;
             } else {
                 div.className = 'message-wrapper';
-                let routingHtml = '';
-                if (routing) {
-                    routingHtml = `<div class="routing-info">🔀 ${routing.requestType} → ${routing.selectedModel}</div>`;
-                }
                 div.innerHTML = `
                     <div class="bot-avatar">🤖</div>
-                    <div>
-                        <div class="message bot">${content}</div>
-                        ${routingHtml}
-                    </div>
+                    <div class="message bot">${escapeHtml(text)}</div>
                 `;
             }
             
@@ -495,7 +475,7 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-        // 显示思考动画
+        // 显示输入动画
         function showTypingIndicator() {
             state.isTyping = true;
             const div = document.createElement('div');
@@ -503,13 +483,15 @@
             div.id = 'typingIndicator';
             div.innerHTML = `
                 <div class="bot-avatar">🤖</div>
-                <div class="message bot">思考中...</div>
+                <div class="typing-indicator">
+                    <span></span><span></span><span></span>
+                </div>
             `;
             chatContainer.appendChild(div);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         
-        // 隐藏思考动画
+        // 隐藏输入动画
         function hideTypingIndicator() {
             state.isTyping = false;
             const indicator = document.getElementById('typingIndicator');
@@ -519,44 +501,25 @@
         // 更新Token显示
         function updateTokenDisplay() {
             tokenCount.textContent = state.tokens.toLocaleString();
-        }
-        
-        // 切换模式
-        function switchMode(mode) {
-            state.currentMode = mode;
-            
-            // 更新UI提示
-            if (mode === 'image_gen') {
-                userInput.placeholder = '描述你想画的图片...';
-                addMessage('🎨 图像生成模式：描述你想画的图片，我会帮你生成！', 'bot');
-            } else if (mode === 'vision') {
-                userInput.placeholder = '点击下方"上传图片"按钮...';
-                addMessage('📸 图像识别模式：上传图片，我会帮你分析内容！', 'bot');
-            } else {
-                userInput.placeholder = '输入你的问题...';
+            if (state.tokens < 1000) {
+                tokenCount.style.color = '#ff4444';
+            } else if (state.tokens < 3000) {
+                tokenCount.style.color = '#ff8800';
             }
-            
-            // 更新按钮状态
-            document.querySelectorAll('.feature-btn').forEach((btn, index) => {
-                btn.classList.remove('active');
-                if ((mode === 'chat' && index === 0) || 
-                    (mode === 'image_gen' && index === 2) ||
-                    (mode === 'vision' && index === 3)) {
-                    btn.classList.add('active');
-                }
-            });
         }
         
-        // 显示帮助
-        function showHelp() {
-            addMessage(`
-                📖 使用指南：<br><br>
-                💬 文本对话：直接输入问题<br>
-                🎨 图像生成：说"画一张..."或"生成图片..."<br>
-                📸 图像识别：点击"上传图片"按钮<br>
-                🎤 语音对话：点击"语音"按钮<br><br>
-                🔀 智能路由：我会自动选择最合适的模型！
-            `, 'bot');
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+        
+        // 切换功能
+        function switchFeature(feature) {
+            const btns = document.querySelectorAll('.feature-btn');
+            btns.forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.feature-btn').classList.add('active');
         }
     </script>
 </body>
