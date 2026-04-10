@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOKI - AI助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 头部 -->
+        <header class="app-header">
+            <div class="logo">
+                <span class="logo-icon">🤖</span>
+                <span class="logo-text">TOKI</span>
+            </div>
+            <div class="token-info">
+                <span class="token-icon">💎</span>
+                <span class="token-count" id="tokenCount">8,542</span>
+                <span class="token-total">/ 10,000</span>
+            </div>
+        </header>
+
+        <!-- 对话区域 -->
+        <main class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <div class="bot-avatar">🤖</div>
+                <div class="message bot">
+                    你好！我是TOKI，你的AI助手。有什么我可以帮你的吗？
+                </div>
+            </div>
+        </main>
+
+        <!-- 输入区域 -->
+        <footer class="input-container">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="userInput" 
+                    placeholder="输入你的问题..."
+                    autocomplete="off"
+                >
+                <button id="sendBtn" class="send-btn">
+                    发送
+                </button>
+            </div>
+            <div class="input-actions">
+                <button class="action-btn" id="clearBtn">清空对话</button>
+                <button class="action-btn" id="upgradeBtn">升级套餐</button>
+            </div>
+        </footer>
+
+        <!-- 套餐弹窗 -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>选择套餐</h2>
+                    <span class="close-btn" id="closeModal">&times;</span>
+                </div>
+                <div class="plans">
+                    <div class="plan">
+                        <div class="plan-name">体验版</div>
+                        <div class="plan-price">免费</div>
+                        <div class="plan-tokens">10,000 tokens/月</div>
+                        <button class="plan-btn">当前套餐</button>
+                    </div>
+                    <div class="plan recommended">
+                        <div class="plan-badge">推荐</div>
+                        <div class="plan-name">标准版</div>
+                        <div class="plan-price">¥49.9<span>/月</span></div>
+                        <div class="plan-tokens">500,000 tokens/月</div>
+                        <button class="plan-btn">立即订阅</button>
+                    </div>
+                    <div class="plan">
+                        <div class="plan-name">尊享版</div>
+                        <div class="plan-price">¥99.9<span>/月</span></div>
+                        <div class="plan-tokens">无限 tokens</div>
+                        <button class="plan-btn">立即订阅</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
