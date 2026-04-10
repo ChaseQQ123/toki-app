@@ -160,20 +160,44 @@ class TOKIVoiceAssistant {
     
     // 初始化视频通话
     initVideoCall() {
+        console.log('🎥 初始化视频通话...');
+        
         // 添加视频通话按钮到头部
         const videoBtn = document.createElement('button');
         videoBtn.className = 'video-call-btn';
         videoBtn.innerHTML = '📹';
         videoBtn.title = '视频通话';
         videoBtn.id = 'videoCallBtn';
+        videoBtn.style.cssText = `
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            z-index: 10;
+        `;
         
         // 点击事件
-        videoBtn.addEventListener('click', () => this.toggleVideoCall());
+        videoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('📹 视频按钮被点击');
+            this.toggleVideoCall();
+        });
         
         // 添加到头部
         const header = document.querySelector('.voice-header');
         if (header) {
+            header.style.position = 'relative';
             header.appendChild(videoBtn);
+            console.log('✅ 视频按钮已添加到头部');
+        } else {
+            console.error('❌ 未找到头部元素');
         }
         
         // 创建视频容器（隐藏）
@@ -533,6 +557,8 @@ class TOKIVoiceAssistant {
     
     // 切换视频通话
     async toggleVideoCall() {
+        console.log('🔄 切换视频通话, 当前状态:', this.videoCall.active);
+        
         if (this.videoCall.active) {
             this.endVideoCall();
         } else {
@@ -542,23 +568,44 @@ class TOKIVoiceAssistant {
     
     // 开始视频通话
     async startVideoCall() {
+        console.log('🎥 开始视频通话...');
+        
         try {
             this.updateStatus('📹 正在启动摄像头...');
             
+            // 检查浏览器支持
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('浏览器不支持视频通话');
+            }
+            
             // 请求摄像头和麦克风权限
+            console.log('📱 请求摄像头和麦克风权限...');
             this.videoCall.localStream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user' },
+                video: { 
+                    facingMode: 'user',
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 }
+                },
                 audio: true
             });
+            
+            console.log('✅ 获得摄像头权限');
             
             // 显示本地视频
             const localVideo = document.getElementById('localVideo');
             if (localVideo) {
                 localVideo.srcObject = this.videoCall.localStream;
+                console.log('✅ 视频已绑定到元素');
+            } else {
+                console.error('❌ 未找到视频元素');
             }
             
             // 显示视频容器
-            document.getElementById('videoContainer')?.classList.add('active');
+            const videoContainer = document.getElementById('videoContainer');
+            if (videoContainer) {
+                videoContainer.style.display = 'flex';
+                console.log('✅ 视频容器已显示');
+            }
             
             this.videoCall.active = true;
             this.updateStatus('📹 视频通话中');
@@ -574,18 +621,31 @@ class TOKIVoiceAssistant {
                 errorMsg = '摄像头权限被拒绝，请在浏览器设置中允许';
             } else if (error.name === 'NotFoundError') {
                 errorMsg = '未找到摄像头设备';
+            } else if (error.name === 'NotSupportedError') {
+                errorMsg = '浏览器不支持视频通话，请使用Chrome浏览器';
             }
             
             this.addMessage(`❌ ${errorMsg}`, 'bot');
             await this.speak('抱歉，无法访问摄像头。');
+            
+            // 隐藏视频容器
+            const videoContainer = document.getElementById('videoContainer');
+            if (videoContainer) {
+                videoContainer.style.display = 'none';
+            }
         }
     }
     
     // 结束视频通话
     endVideoCall() {
+        console.log('🔚 结束视频通话...');
+        
         // 停止所有视频轨道
         if (this.videoCall.localStream) {
-            this.videoCall.localStream.getTracks().forEach(track => track.stop());
+            this.videoCall.localStream.getTracks().forEach(track => {
+                console.log('🛑 停止轨道:', track.kind);
+                track.stop();
+            });
         }
         
         // 清除视频元素
@@ -595,7 +655,10 @@ class TOKIVoiceAssistant {
         }
         
         // 隐藏视频容器
-        document.getElementById('videoContainer')?.classList.remove('active');
+        const videoContainer = document.getElementById('videoContainer');
+        if (videoContainer) {
+            videoContainer.style.display = 'none';
+        }
         
         this.videoCall.active = false;
         this.updateStatus('准备就绪');
