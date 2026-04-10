@@ -6,16 +6,16 @@ class TOKISmartRouter {
         this.zhipuApiKey = 'c4911cf15f844167bd26301e25622cf1.n1BU10ytXbnQ6N5d';
         this.zhipuBaseUrl = 'https://open.bigmodel.cn/api/paas/v4';
         
-        // 模型配置
+        // 模型配置（使用实际可用的模型名称）
         this.models = {
             text: {
-                simple: 'glm-4-flash',
-                medium: 'glm-4.5-flash',
-                complex: 'glm-4.7-flash'
+                simple: 'glm-4-flash',      // 简单任务
+                medium: 'glm-4-air',        // 中等任务
+                complex: 'glm-4.7'          // 复杂任务
             },
-            vision: 'glm-4.6v-flash',
-            imageGen: 'cogview-3-flash',
-            videoGen: 'cogvideox-flash'
+            vision: 'glm-4v',               // 图像理解
+            imageGen: 'cogview-3-flash',    // 图像生成
+            videoGen: 'cogvideox-flash'     // 视频生成
         };
     }
     
@@ -119,7 +119,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: selectedModel.replace('-', '.'),
+                    model: selectedModel,  // 直接使用模型名称，不要转换！
                     messages: messages,
                     temperature: options.temperature || 0.7,
                     max_tokens: options.maxTokens || 2000
@@ -161,7 +161,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: this.models.imageGen.replace('-', '.'),
+                    model: this.models.imageGen,  // 直接使用
                     prompt: prompt
                 })
             });
@@ -198,7 +198,7 @@ class TOKISmartRouter {
                     'Authorization': `Bearer ${this.zhipuApiKey}`
                 },
                 body: JSON.stringify({
-                    model: this.models.vision.replace('-', '.'),
+                    model: this.models.vision,  // 直接使用
                     messages: [{
                         role: 'user',
                         content: [
